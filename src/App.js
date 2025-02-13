@@ -18,7 +18,7 @@ function PersonPage() {
 
 function Home() {
   const styles = {
-    'text-align': 'center',
+    'textAlign': 'center',
   }
   return <h1 style={styles} >Journal of React</h1>
 }
