@@ -27,7 +27,9 @@ function Navbar() {
   return (
     <nav>
       <ul className="wrapper">
-        {PAGES.map((page) => <NavLink key={page.destination} page={page} />)}
+        {
+          PAGES.map(( page ) => <NavLink key={page.destination} page={page} />)
+        }
       </ul>
     </nav>
   );

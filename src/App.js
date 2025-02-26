@@ -10,17 +10,20 @@ import './App.css';
 
 import Navbar from './Components/Navbar';
 import People from './Components/People';
+import Submissions from './Components/Submissions/Submissions';
 
 function PersonPage() {
-  const { name } = useParams();
-  return <h1>{name}</h1>
+  const { email } = useParams();
+  return <h1>{email}</h1>
 }
+
+const homeHeader = "Journal of React";
 
 function Home() {
   const styles = {
     'textAlign': 'center',
   }
-  return <h1 style={styles} >Journal of React</h1>
+  return <h1 style={styles} >{homeHeader}</h1>
 }
 
 function App() {
@@ -28,12 +31,17 @@ function App() {
     <BrowserRouter>
       <Navbar />
       <Routes>
-         <Route index element={<Home />} />
+        <Route index element={<Home />} />
         <Route path="people" element={<People />} />
-        <Route path="people/:name" element={<PersonPage />} />
+        <Route path="people/:email" element={<PersonPage />} />
+        <Route path="submissions" element={<Submissions /> } />
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
+
+export {
+  homeHeader,
+};
