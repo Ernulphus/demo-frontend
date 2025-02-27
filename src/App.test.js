@@ -12,7 +12,7 @@ describe('App', () => {
     await screen.findByRole('heading');
     await screen.findAllByRole('listitem');
 
-    expect(screen.getByRole('heading')).not.toHaveTextContent(homeHeader);
+    expect(screen.getByRole('heading')).toHaveTextContent(homeHeader);
     
     expect(screen.getAllByRole('listitem')).toHaveLength(3);
   });
