@@ -16,32 +16,28 @@ function AddPersonForm({
   cancel,
   fetchPeople,
   setError,
+  roleOptions,
 }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [role, setRole] = useState('');
 
   const changeName = (event) => { setName(event.target.value); };
   const changeEmail = (event) => { setEmail(event.target.value); };
+  const changeRole = (event) => { setRole(event.target.value); };
 
   const addPerson = (event) => {
     event.preventDefault();
     const newPerson = {
       name: name,
       email: email,
-      roles: 'ED',
+      roles: role,
       affiliation: '',
     }
     axios.put(PEOPLE_CREATE_ENDPOINT, newPerson)
       .then(fetchPeople)
       .catch((error) => { setError(`There was a problem adding the person. ${error}`); });
   };
-
-  const getRoles = () => {
-    axios.get(ROLES_ENDPOINT)
-      .then(({ data }) => console.log(data))
-      .catch((error) => { setError(`There was a problem getting roles. ${error}`); });
-  }
-  getRoles();
 
   if (!visible) return null;
   return (
@@ -54,6 +50,16 @@ function AddPersonForm({
         Email
       </label>
       <input required type="text" id="email" onChange={changeEmail} />
+      <select required name='role' onChange={changeRole}>
+        {
+          Object.keys(roleOptions).map((code) => (
+            <option key={code} value={code}>
+              {roleOptions[code]}
+            </option>
+          ))
+        }
+      </select>
+
       <button type="button" onClick={cancel}>Cancel</button>
       <button type="submit" onClick={addPerson}>Submit</button>
     </form>
@@ -64,6 +70,7 @@ AddPersonForm.propTypes = {
   cancel: propTypes.func.isRequired,
   fetchPeople: propTypes.func.isRequired,
   setError: propTypes.func.isRequired,
+  roleOptions: propTypes.object.isRequired,
 };
 
 function ErrorMessage({ message }) {
@@ -77,8 +84,12 @@ ErrorMessage.propTypes = {
   message: propTypes.string.isRequired,
 };
 
-function Person({ person, fetchPeople }) {
-  const { name, email } = person;
+function Person({
+  person,
+  fetchPeople,
+  roleMap,
+ }) {
+  const { name, email, roles } = person;
 
   const deletePerson = () => {
     axios.delete(`${PEOPLE_READ_ENDPOINT}/${email}`)
@@ -93,6 +104,9 @@ function Person({ person, fetchPeople }) {
           <p>
             Email: {email}
           </p>
+          <ul>
+            Roles: {roles.map((role) => (<li key={role}>{ roleMap[role] }</li>))}
+          </ul>
         </div>
       </Link>
       <button onClick={deletePerson}>Delete person</button>
@@ -103,8 +117,10 @@ Person.propTypes = {
   person: propTypes.shape({
     name: propTypes.string.isRequired,
     email: propTypes.string.isRequired,
+    roles: propTypes.arrayOf(propTypes.string).isRequired,
   }).isRequired,
   fetchPeople: propTypes.func,
+  roleMap: propTypes.object.isRequired,
 };
 
 function peopleObjectToArray(Data) {
@@ -117,6 +133,8 @@ function People() {
   const [error, setError] = useState('');
   const [people, setPeople] = useState([]);
   const [addingPerson, setAddingPerson] = useState(false);
+  const [roleMap, setRoleMap] = useState({});
+
 
   const fetchPeople = () => {
     axios.get(PEOPLE_READ_ENDPOINT)
@@ -126,10 +144,18 @@ function People() {
       .catch((error) => setError(`There was a problem retrieving the list of people. ${error}`));
   };
 
+  const getRoles = () => {
+    axios.get(ROLES_ENDPOINT)
+      .then(({ data }) => setRoleMap(data))
+      .catch((error) => { setError(`There was a problem getting roles. ${error}`); });
+  }
+
   const showAddPersonForm = () => { setAddingPerson(true); };
   const hideAddPersonForm = () => { setAddingPerson(false); };
 
   useEffect(fetchPeople, []);
+  useEffect(getRoles, []);
+
 
   return (
     <div className="wrapper">
@@ -146,9 +172,19 @@ function People() {
         cancel={hideAddPersonForm}
         fetchPeople={fetchPeople}
         setError={setError}
+        roleOptions={roleMap}
       />
       {error && <ErrorMessage message={error} />}
-      {people.map((person) => <Person key={person.email} person={person} fetchPeople={fetchPeople} />)}
+      {
+      people.map((person) => 
+        <Person
+          key={person.email}
+          person={person}
+          fetchPeople={fetchPeople}
+          roleMap={roleMap}
+        />
+      )
+      }
     </div>
   );
 }
